@@ -10,6 +10,14 @@ import sg "shared:sokol/gfx"
 
 default_context: runtime.Context
 
+// Global state
+Globals :: struct {
+	shader: sg.Shader,
+	pipeline: sg.Pipeline
+}
+
+g: ^Globals
+
 main :: proc() {
 	context.logger = log.create_console_logger()
 	default_context = context
@@ -38,12 +46,19 @@ init_cb :: proc "c" () {
 		allocator = sg.Allocator(shelpers.allocator(&default_context)),
 		logger = sg.Logger(shelpers.logger(&default_context))
 	})
+	
+	// Store a pointer to our global state
+	g = new(Globals)
+
+	// Set global values
+	g.shader = sg.make_shader(main_shader_desc(sg.query_backend()))
 }
 
 // Runs on app exit
 cleanup_cb :: proc "c" () {
 	context = default_context
 	sg.shutdown()
+	free(g)
 }
 
 // Runs each render frame

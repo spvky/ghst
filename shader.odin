@@ -1,3 +1,5 @@
+package ghst
+import sg "shared:sokol/gfx"
 /*
     #version:1# (machine generated, don't edit!)
 
