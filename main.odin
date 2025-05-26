@@ -52,12 +52,23 @@ init_cb :: proc "c" () {
 
 	// Set global values
 	g.shader = sg.make_shader(main_shader_desc(sg.query_backend()))
+	g.pipeline = sg.make_pipeline({
+		shader = g.shader,
+		layout = {
+			attrs = {
+				ATTR_main_pos = {format = .FLOAT2}
+			}
+		}
+
+	})
 }
 
 // Runs on app exit
 cleanup_cb :: proc "c" () {
 	context = default_context
 	sg.shutdown()
+	sg.destroy_shader(g.shader)
+	sg.destroy_pipeline(g.pipeline)
 	free(g)
 }
 
@@ -66,6 +77,9 @@ frame_cb :: proc "c" () {
 	context = default_context
 	// Takes in a swapchain, which is essentially a chain of framebuffers
 	sg.begin_pass({swapchain = shelpers.glue_swapchain()})
+
+	// Apply our primary pipeline, which defines the shader we execute and the inputs we send to it
+	sg.apply_pipeline(g.pipeline)
 
 	// Drawing logic
 
