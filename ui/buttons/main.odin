@@ -1,5 +1,6 @@
 package buttons
 
+import "core:strings"
 import rl "vendor:raylib"
 
 Button :: struct {
@@ -33,11 +34,16 @@ Button_Layout_Mode :: enum {
 	Column,
 }
 
+// Makes a button container, allocates with context.allocator
+make_button_container :: proc {
+	make_button_container_with_style,
+	make_button_container_default_style,
+}
 
-// Makes a button row, allocates with context.allocator
-make_button_container :: proc(
+// Makes a button container with a passed Button_Style, allocates with context.allocator
+make_button_container_with_style :: proc(
 	position: [2]i32,
-	style: Button_Style = DEFAULT_BUTTON_STYLE,
+	style: Button_Style,
 	buttons: ..Button,
 ) -> Button_Container {
 	initial_capacity := len(buttons)
@@ -46,23 +52,24 @@ make_button_container :: proc(
 	return Button_Container{position = position, buttons = button_list, style = style}
 }
 
-delete_button_container :: proc(container: Button_Container) {
-	delete(container.buttons)
+
+// Makes a button container with the default Button_Style, allocates with context.allocator
+make_button_container_default_style :: proc(
+	position: [2]i32,
+	buttons: ..Button,
+) -> Button_Container {
+	initial_capacity := len(buttons)
+	button_list := make([dynamic]Button, 0, initial_capacity)
+	append_elems(&button_list, ..buttons)
+	return Button_Container {
+		position = position,
+		buttons = button_list,
+		style = DEFAULT_BUTTON_STYLE,
+	}
 }
 
-init_ui :: proc() {
-	top_row_buttons = make_button_container({0, 0}, DEFAULT_BUTTON_STYLE, {
-		text = "Reset",
-		callback = proc() {
-			fmt.println("Reset")
-		},
-	}, {
-		text = "Really long button that will have the proper width and everything, isn't that neat",
-		callback = proc() {fmt.println("That's pretty long")},
-	}, {
-		text = "Play",
-		callback = proc() {fmt.println("Starting Game")},
-	})
+delete_button_container :: proc(container: Button_Container) {
+	delete(container.buttons)
 }
 
 draw_button_container :: proc(row: Button_Container) {
