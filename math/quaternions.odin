@@ -60,13 +60,19 @@ look_at_point :: proc(origin, target: Vec3, up_vector: Vec3 = VEC_Y) -> Quat {
 	return yaw * pitch
 }
 
-// Returns a lateral (x,0,z) vector given `quaternion` and `input_vector`
-interpolate_lateral_vector :: proc(quaternion: Quat, input_vector: Vec2) -> Vec3 {
+// Returns a lateral (x,0,z) vector given `quaternion` and `input_vector`, used to take in input and interpolate it in to camera space
+interpolate_lateral_vector :: proc(
+	quaternion: Quat,
+	input_vector: Vec2,
+	zero_y: bool = true,
+) -> Vec3 {
 	vec := l.normalize0(Vec3{input_vector.x, 0, input_vector.y})
 	right, forward: Vec3
 	right = l.normalize0(l.quaternion_mul_vector3(quaternion, VEC_X))
 	forward = l.normalize0(l.quaternion_mul_vector3(quaternion, VEC_Z))
 	interpolated_vec: Vec3 = (forward * vec.z) + (right * vec.x)
-	interpolated_vec.y = 0
+	if zero_y {
+		interpolated_vec.y = 0
+	}
 	return l.normalize0(interpolated_vec)
 }
